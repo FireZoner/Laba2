@@ -16,6 +16,8 @@ public class Technique {
     private Sorcerer owner;
     private long damage;
     
+    private String ownerName;
+    
     public Technique() {
     }
     
@@ -56,5 +58,13 @@ public class Technique {
     
     public void setDamage(long damage) {
         this.damage = damage;
+    }
+
+    public String getOwnerName() { 
+        return ownerName; 
+    }
+    
+    public void setOwnerName(String ownerName) { 
+        this.ownerName = ownerName; 
     }
 }

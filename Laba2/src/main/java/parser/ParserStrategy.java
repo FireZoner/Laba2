@@ -6,12 +6,13 @@
 package parser;
 
 import model.*;
+import model.builder.MissionBuilder;
 import java.io.*;
 
 /**
- *
  * @author zubbo
  */
-public interface MissionParser {
-    Mission parse(File file) throws IOException;
+public interface ParserStrategy {
+    boolean supports(File file);
+    Mission parse(File file, MissionBuilder builder) throws IOException;
 }
