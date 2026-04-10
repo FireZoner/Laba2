@@ -18,21 +18,30 @@ public class PipeParserStrategy implements ParserStrategy {
     
     @Override
     public boolean supports(File file) {
-        String name = file.getName().toLowerCase();
-        if (!name.endsWith(".txt")) return false;
-        
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String firstLine = reader.readLine();
-            if (firstLine != null && firstLine.contains("|")) {
-                String type = firstLine.split("\\|")[0];
-                return type.equals("MISSION_CREATED") || 
-                       type.equals("CURSE_DETECTED") ||
-                       type.equals("SORCERER_ASSIGNED");
-            }
+            if (firstLine == null) return false;
+            
+            firstLine = firstLine.trim();
+            if (!firstLine.contains("|")) return false;
+            
+            String[] parts = firstLine.split("\\|");
+            if (parts.length < 2) return false;
+            
+            String type = parts[0];
+            
+            return type.equals("MISSION_CREATED") || 
+                   type.equals("CURSE_DETECTED") ||
+                   type.equals("SORCERER_ASSIGNED") ||
+                   type.equals("TECHNIQUE_USED") ||
+                   type.equals("TIMELINE_EVENT") ||
+                   type.equals("ENEMY_ACTION") ||
+                   type.equals("CIVILIAN_IMPACT") ||
+                   type.equals("MISSION_RESULT");
+                   
         } catch (IOException e) {
             return false;
         }
-        return false;
     }
     
     @Override
