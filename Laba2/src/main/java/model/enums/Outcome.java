@@ -11,5 +11,6 @@ package model.enums;
  */
 public enum Outcome {
     SUCCESS,
+    PARTIAL_SUCCESS,
     FAILURE
 }
