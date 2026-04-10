@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 /**
  * @author zubbo
  */
-public class PipeParserStrategy implements ParserStrategy {
+public class EmptyParserStrategy implements ParserStrategy {
     
     @Override
     public boolean supports(File file) {
