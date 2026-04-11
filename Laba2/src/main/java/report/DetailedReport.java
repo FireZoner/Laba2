@@ -194,7 +194,7 @@ public class DetailedReport implements MissionReport {
         }
         
         sb.append(LINE).append("\n");
-        sb.append("                    END OF REPORT                                 \n");
+        sb.append("                END OF REPORT                    \n");
         sb.append(LINE).append("\n");
         
         return sb.toString();

@@ -14,7 +14,8 @@ import javax.swing.*;
 public class Laba2 {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new MissionAnalyzerGUI().setVisible(true);
+            MissionAnalyzerGUI gui = new MissionAnalyzerGUI();
+            gui.setVisible(true);
         });
     }
 }
