@@ -7,7 +7,7 @@ package model;
 import model.enums.*;
 
 /**
- * Условия среды
+ *
  * @author zubbo
  */
 public class EnvironmentConditions {

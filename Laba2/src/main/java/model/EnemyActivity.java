@@ -8,7 +8,7 @@ import model.enums.*;
 import java.util.*;
 
 /**
- * Активность противника
+ *
  * @author zubbo
  */
 public class EnemyActivity {

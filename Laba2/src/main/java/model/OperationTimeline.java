@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import model.enums.*;
 
 /**
- * Хронология операции
+ *
  * @author zubbo
  */
 public class OperationTimeline {
