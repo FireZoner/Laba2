@@ -6,7 +6,7 @@
 package parser;
 
 import model.*;
-import model.builder.MissionBuilder;
+import builders.MissionBuilder;
 import model.enums.*;
 import java.io.*;
 import java.time.LocalDateTime;

@@ -5,7 +5,7 @@
 package parser;
 
 import model.*;
-import model.builder.MissionBuilder;
+import builders.MissionBuilder;
 import model.enums.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
