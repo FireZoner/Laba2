@@ -2,17 +2,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package filter;
+
+package analysis;
 
 import model.Mission;
 
 /**
- *
  * @author zubbo
  */
-
-public interface MissionFilter {
-    MissionFilter setNext(MissionFilter nextFilter);
-
-    void filter(Mission mission) throws Exception;
+public interface MissionAnalyzer {
+    MissionAnalyzer setNext(MissionAnalyzer nextAnalyzer);
+    void analyze(Mission mission, AnalysisResult analysisResult) throws Exception;
 }
