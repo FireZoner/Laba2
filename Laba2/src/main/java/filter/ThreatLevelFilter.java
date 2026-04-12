@@ -22,6 +22,7 @@ public class ThreatLevelFilter implements MissionFilter {
     
     @Override
     public boolean accept(Mission mission) {
+        // TODO: Реализовать проверку
         if (mission.getCurse() == null) return false;
         return mission.getCurse().getThreatLevel() == level;
     }
