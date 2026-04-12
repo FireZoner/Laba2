@@ -9,7 +9,8 @@ import model.Mission;
 import model.enums.ThreatLevel;
 
 /**
- *
+ * Фильтр по уровню угрозы
+ * TODO: Добавить возможность выбора нескольких уровней
  * @author zubbo
  */
 public class ThreatLevelFilter implements MissionFilter {
