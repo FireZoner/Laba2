@@ -19,7 +19,6 @@ public class CivilianImpact {
     
     public CivilianImpact() {}
     
-    // Getters and Setters
     public int getEvacuated() { 
         return evacuated; 
     }

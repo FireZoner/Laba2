@@ -17,11 +17,9 @@ public class EnemyActivity {
     private final List<String> attackPatterns;
     private Mobility mobility;
     private EscalationRisk escalationRisk;
-    private final List<String> countermeasures;
     
     public EnemyActivity() {
         this.attackPatterns = new ArrayList<>();
-        this.countermeasures = new ArrayList<>();
     }
     
     public BehaviorType getBehaviorType() { 
@@ -61,13 +59,5 @@ public class EnemyActivity {
     
     public void setEscalationRisk(EscalationRisk escalationRisk) { 
         this.escalationRisk = escalationRisk; 
-    }
-    
-    public List<String> getCountermeasures() { 
-        return countermeasures; 
-    }
-    
-    public void addCountermeasure(String measure) { 
-        this.countermeasures.add(measure); 
     }
 }
