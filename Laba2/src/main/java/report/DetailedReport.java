@@ -122,13 +122,6 @@ public class DetailedReport implements MissionReport {
                     sb.append(String.format("    - %s\n", pattern));
                 }
             }
-            
-            if (!ea.getCountermeasures().isEmpty()) {
-                sb.append("  Countermeasures:\n");
-                for (String measure : ea.getCountermeasures()) {
-                    sb.append(String.format("    - %s\n", measure));
-                }
-            }
             sb.append("\n");
         }
         
