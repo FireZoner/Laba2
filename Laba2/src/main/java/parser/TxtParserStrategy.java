@@ -68,58 +68,43 @@ public class TxtParserStrategy implements ParserStrategy {
         if (section == null) return;
         
         switch (section.toUpperCase()) {
-            case "MISSION":
-                processMissionField(key, value, builder);
-                break;
-            case "CURSE":
-                processCurseField(key, value, builder);
-                break;
-            case "SORCERER":
-                processSorcererField(key, value, builder);
-                break;
-            case "TECHNIQUE":
-                processTechniqueField(key, value, builder);
-                break;
-            case "ENVIRONMENT":
-                processEnvironmentField(key, value, builder);
-                break;
+            case "MISSION" -> processMissionField(key, value, builder);
+            case "CURSE" -> processCurseField(key, value, builder);
+            case "SORCERER" -> processSorcererField(key, value, builder);
+            case "TECHNIQUE" -> processTechniqueField(key, value, builder);
+            case "ENVIRONMENT" -> processEnvironmentField(key, value, builder);
         }
     }
     
     private void processMissionField(String key, String value, MissionBuilder builder) {
         switch (key) {
-            case "missionId":
-                builder.setMissionId(value);
-                break;
-            case "date":
-                builder.setDate(value);
-                break;
-            case "location":
-                builder.setLocation(value);
-                break;
-            case "outcome":
+            case "missionId" -> builder.setMissionId(value);
+            case "date" -> builder.setDate(value);
+            case "location" -> builder.setLocation(value);
+            case "outcome" -> {
                 try {
                     builder.setOutcome(Outcome.valueOf(value));
                 } catch (IllegalArgumentException e) {}
-                break;
-            case "damageCost":
+            }
+            case "damageCost" -> {
                 try {
                     builder.setDamageCost(Long.parseLong(value));
                 } catch (NumberFormatException e) {}
                 break;
+            }
         }
     }
     
     private void processCurseField(String key, String value, MissionBuilder builder) {
         switch (key) {
-            case "name":
+            case "name" -> {
                 if (builder.build().getCurse() == null) {
                     builder.setCurse(value, null);
                 } else {
                     builder.setCurse(value, builder.build().getCurse().getThreatLevel());
                 }
-                break;
-            case "threatLevel":
+            }
+            case "threatLevel" -> {
                 try {
                     ThreatLevel level = ThreatLevel.valueOf(value);
                     if (builder.build().getCurse() == null) {
@@ -129,6 +114,7 @@ public class TxtParserStrategy implements ParserStrategy {
                     }
                 } catch (IllegalArgumentException e) {}
                 break;
+            }
         }
     }
     
@@ -136,11 +122,11 @@ public class TxtParserStrategy implements ParserStrategy {
     
     private void processSorcererField(String key, String value, MissionBuilder builder) {
         switch (key) {
-            case "name":
+            case "name" -> {
                 currentSorcerer = new Sorcerer();
                 currentSorcerer.setName(value);
-                break;
-            case "rank":
+            }
+            case "rank" -> {
                 if (currentSorcerer != null) {
                     try {
                         currentSorcerer.setRank(Rank.valueOf(value));
@@ -149,6 +135,7 @@ public class TxtParserStrategy implements ParserStrategy {
                     } catch (IllegalArgumentException e) {}
                 }
                 break;
+            }
         }
     }
     
@@ -156,23 +143,23 @@ public class TxtParserStrategy implements ParserStrategy {
     
     private void processTechniqueField(String key, String value, MissionBuilder builder) {
         switch (key) {
-            case "name":
+            case "name" -> {
                 currentTechnique = new Technique();
                 currentTechnique.setName(value);
-                break;
-            case "type":
+            }
+            case "type" -> {
                 if (currentTechnique != null) {
                     try {
                         currentTechnique.setType(TechniqueType.valueOf(value));
                     } catch (IllegalArgumentException e) {}
                 }
-                break;
-            case "owner":
+            }
+            case "owner" -> {
                 if (currentTechnique != null) {
                     currentTechnique.setOwnerName(value);
                 }
-                break;
-            case "damage":
+            }
+            case "damage" -> {
                 if (currentTechnique != null) {
                     try {
                         currentTechnique.setDamage(Long.parseLong(value));
@@ -181,6 +168,7 @@ public class TxtParserStrategy implements ParserStrategy {
                     } catch (NumberFormatException e) {}
                 }
                 break;
+            }
         }
     }
     
@@ -191,26 +179,27 @@ public class TxtParserStrategy implements ParserStrategy {
         }
         
         switch (key) {
-            case "weather":
+            case "weather" -> {
                 try {
                     conditions.setWeather(Weather.valueOf(value));
                 } catch (IllegalArgumentException e) {}
-                break;
-            case "timeOfDay":
+            }
+            case "timeOfDay" -> {
                 try {
                     conditions.setTimeOfDay(TimeOfDay.valueOf(value));
                 } catch (IllegalArgumentException e) {}
-                break;
-            case "visibility":
+            }
+            case "visibility" -> {
                 try {
                     conditions.setVisibility(Visibility.valueOf(value));
                 } catch (IllegalArgumentException e) {}
-                break;
-            case "cursedEnergyDensity":
+            }
+            case "cursedEnergyDensity" -> {
                 try {
                     conditions.setCursedEnergyDensity(Integer.parseInt(value));
                 } catch (NumberFormatException e) {}
                 break;
+            }
         }
         
         builder.setEnvironmentConditions(conditions);

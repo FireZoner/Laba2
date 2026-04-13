@@ -85,33 +85,38 @@ public class LegacyTxtParserStrategy implements ParserStrategy {
                            Map<Integer, Technique> techniqueMap) {
         
         switch (key) {
-            case "missionId":
+            case "missionId" -> {
                 builder.setMissionId(value);
                 return;
-            case "date":
+            }
+            case "date" -> {
                 builder.setDate(value);
                 return;
-            case "location":
+            }
+            case "location" -> {
                 builder.setLocation(value);
                 return;
-            case "outcome":
+            }
+            case "outcome" -> {
                 try {
                     builder.setOutcome(Outcome.valueOf(value.toUpperCase()));
                 } catch (IllegalArgumentException e) {
                     System.out.println("Unknown outcome: " + value);
                 }
                 return;
-            case "damageCost":
+            }
+            case "damageCost" -> {
                 try {
                     builder.setDamageCost(Long.parseLong(value));
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid damageCost: " + value);
                 }
                 return;
-            case "note":
-            case "comment":
+            }
+            case "note", "comment" -> {
                 builder.setComment(value);
                 return;
+            }
         }
         
         if (key.startsWith("curse.")) {
@@ -140,16 +145,15 @@ public class LegacyTxtParserStrategy implements ParserStrategy {
         }
         
         switch (curseKey) {
-            case "name":
-                curseName = value;
-                break;
-            case "threatLevel":
+            case "name" -> curseName = value;
+            case "threatLevel" -> {
                 try {
                     threatLevel = ThreatLevel.valueOf(value.toUpperCase());
                 } catch (IllegalArgumentException e) {
                     System.out.println("Unknown threatLevel: " + value);
                 }
                 break;
+            }
         }
         
         builder.setCurse(curseName, threatLevel);

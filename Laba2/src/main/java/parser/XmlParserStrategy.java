@@ -137,27 +137,6 @@ public class XmlParserStrategy implements ParserStrategy {
                     }
                 }
             }
-            
-            if (ea.has("countermeasuresUsed")) {
-                JsonNode cmNode = ea.get("countermeasuresUsed");
-                if (cmNode.has("measure")) {
-                    JsonNode measureNode = cmNode.get("measure");
-                    if (measureNode.isArray()) {
-                        for (JsonNode m : measureNode) {
-                            String measure = m.asText();
-                            if (measure != null && !measure.isEmpty()) {
-                                activity.addCountermeasure(measure);
-                            }
-                        }
-                    } else {
-                        String measure = measureNode.asText();
-                        if (measure != null && !measure.isEmpty()) {
-                            activity.addCountermeasure(measure);
-                        }
-                    }
-                }
-            }
-            
             builder.setEnemyActivity(activity);
         }
         
@@ -289,7 +268,6 @@ public class XmlParserStrategy implements ParserStrategy {
                 try {
                     event.setTimestamp(java.time.LocalDateTime.parse(timestampStr));
                 } catch (Exception e) {
-                    // Ignore parse error
                 }
             }
             
