@@ -59,7 +59,6 @@ public class MissionBuilder {
         return this;
     }
     
-    // Sorcerers
     public MissionBuilder addSorcerer(Sorcerer sorcerer) {
         mission.addSorcerer(sorcerer);
         return this;
@@ -150,6 +149,12 @@ public class MissionBuilder {
                 Sorcerer owner = findSorcererByName(t.getOwnerName());
                 if (owner != null) {
                     t.setOwner(owner);
+                } else {
+                    Sorcerer unknown = new Sorcerer(t.getOwnerName(), null);
+                    mission.addSorcerer(unknown);
+                    t.setOwner(unknown);
+                    System.out.println("[WARNING] Created placeholder sorcerer: '" + 
+                        t.getOwnerName() + "' for technique '" + t.getName() + "'");
                 }
             }
         }
