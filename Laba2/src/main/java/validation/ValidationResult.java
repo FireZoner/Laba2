@@ -29,5 +29,19 @@ public class ValidationResult {
         warnings.add(warning);
     }
     
-    // TODO: Геттеры
+    public List<String> getErrors() {
+        return errors;
+    }
+    
+    public List<String> getWarnings() {
+        return warnings;
+    }
+    
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+    
+    public boolean hasWarnings() {
+        return !warnings.isEmpty();
+    }
 }
