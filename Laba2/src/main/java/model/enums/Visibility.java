@@ -14,6 +14,7 @@ public enum Visibility {
     MODERATE,
     POOR,
     VERY_POOR,
+    LOW,
     ZERO;
     
     public static Visibility parse(String value) {
