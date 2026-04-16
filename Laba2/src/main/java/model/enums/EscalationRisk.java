@@ -12,5 +12,15 @@ public enum EscalationRisk {
     LOW,
     MEDIUM,
     HIGH,
-    CRITICAL
+    CRITICAL;
+    
+    public static EscalationRisk parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return EscalationRisk.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown escalation risk: " + value);
+            return null;
+        }
+    }
 }

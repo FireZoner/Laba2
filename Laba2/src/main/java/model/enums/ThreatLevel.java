@@ -10,5 +10,15 @@ package model.enums;
  */
 public enum ThreatLevel {
     HIGH,
-    SPECIAL_GRADE
+    SPECIAL_GRADE;
+    
+    public static ThreatLevel parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return ThreatLevel.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown threatLevel: " + value);
+            return null;
+        }
+    }
 }

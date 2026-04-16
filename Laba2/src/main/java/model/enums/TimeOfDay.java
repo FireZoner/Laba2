@@ -14,5 +14,15 @@ public enum TimeOfDay {
     AFTERNOON,
     EVENING,
     NIGHT,
-    MIDNIGHT
+    MIDNIGHT;
+    
+    public static TimeOfDay parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return TimeOfDay.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown timeOfDay: " + value);
+            return null;
+        }
+    }
 }

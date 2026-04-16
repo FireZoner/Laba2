@@ -28,7 +28,6 @@ public class XmlParserStrategy implements ParserStrategy {
         String name = file.getName().toLowerCase();
         if (!name.endsWith(".xml")) return false;
         
-        // Дополнительная проверка: пытаемся прочитать корневой элемент
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String firstLine = reader.readLine();
             return firstLine != null && firstLine.contains("<mission");
@@ -48,11 +47,7 @@ public class XmlParserStrategy implements ParserStrategy {
         
         String outcomeStr = getString(root, "outcome");
         if (outcomeStr != null) {
-            try {
-                builder.setOutcome(Outcome.valueOf(outcomeStr.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Unknown outcome: " + outcomeStr);
-            }
+            builder.setOutcome(Outcome.parse(outcomeStr));
         }
         
         String comment = getString(root, "comment");
@@ -66,7 +61,7 @@ public class XmlParserStrategy implements ParserStrategy {
         if (root.has("curse") && root.get("curse") != null && !root.get("curse").isNull()) {
             JsonNode curseNode = root.get("curse");
             String curseName = getString(curseNode, "name");
-            ThreatLevel threatLevel = parseThreatLevel(getString(curseNode, "threatLevel"));
+            ThreatLevel threatLevel = ThreatLevel.parse(getString(curseNode, "threatLevel"));
             builder.setCurse(curseName, threatLevel);
         }
         
@@ -113,10 +108,10 @@ public class XmlParserStrategy implements ParserStrategy {
         if (root.has("enemyActivity") && root.get("enemyActivity") != null) {
             JsonNode ea = root.get("enemyActivity");
             EnemyActivity activity = new EnemyActivity();
-            activity.setBehaviorType(parseBehaviorType(getString(ea, "behaviorType")));
+            activity.setBehaviorType(BehaviorType.parse(getString(ea, "behaviorType")));
             activity.setTargetPriority(getString(ea, "targetPriority"));
-            activity.setMobility(parseMobility(getString(ea, "mobility")));
-            activity.setEscalationRisk(parseEscalationRisk(getString(ea, "escalationRisk")));
+            activity.setMobility(Mobility.parse(getString(ea, "mobility")));
+            activity.setEscalationRisk(EscalationRisk.parse(getString(ea, "escalationRisk")));
             
             if (ea.has("attackPatterns")) {
                 JsonNode patternsNode = ea.get("attackPatterns");
@@ -137,15 +132,16 @@ public class XmlParserStrategy implements ParserStrategy {
                     }
                 }
             }
+            
             builder.setEnemyActivity(activity);
         }
         
         if (root.has("environmentConditions") && root.get("environmentConditions") != null) {
             JsonNode ec = root.get("environmentConditions");
             EnvironmentConditions conditions = new EnvironmentConditions();
-            conditions.setWeather(parseWeather(getString(ec, "weather")));
-            conditions.setTimeOfDay(parseTimeOfDay(getString(ec, "timeOfDay")));
-            conditions.setVisibility(parseVisibility(getString(ec, "visibility")));
+            conditions.setWeather(Weather.parse(getString(ec, "weather")));
+            conditions.setTimeOfDay(TimeOfDay.parse(getString(ec, "timeOfDay")));
+            conditions.setVisibility(Visibility.parse(getString(ec, "visibility")));
             conditions.setCursedEnergyDensity(getInt(ec, "cursedEnergyDensity"));
             builder.setEnvironmentConditions(conditions);
         }
@@ -156,82 +152,8 @@ public class XmlParserStrategy implements ParserStrategy {
             impact.setEvacuated(getInt(ci, "evacuated"));
             impact.setInjured(getInt(ci, "injured"));
             impact.setMissing(getInt(ci, "missing"));
-            impact.setPublicExposureRisk(parsePublicExposureRisk(getString(ci, "publicExposureRisk")));
+            impact.setPublicExposureRisk(PublicExposureRisk.parse(getString(ci, "publicExposureRisk")));
             builder.setCivilianImpact(impact);
-        }
-        
-        if (root.has("operationTimeline") && root.get("operationTimeline") != null) {
-            JsonNode timelineNode = root.get("operationTimeline");
-            if (timelineNode.has("event")) {
-                JsonNode eventNode = timelineNode.get("event");
-                if (eventNode.isArray()) {
-                    for (JsonNode e : eventNode) {
-                        addTimelineEventFromXml(e, builder);
-                    }
-                } else {
-                    addTimelineEventFromXml(eventNode, builder);
-                }
-            }
-        }
-        
-        if (root.has("missionTags") && root.get("missionTags") != null) {
-            JsonNode tagsNode = root.get("missionTags");
-            if (tagsNode.has("tag")) {
-                JsonNode tagNode = tagsNode.get("tag");
-                if (tagNode.isArray()) {
-                    for (JsonNode t : tagNode) {
-                        String tag = t.asText();
-                        if (tag != null && !tag.isEmpty()) {
-                            builder.addMissionTag(tag);
-                        }
-                    }
-                } else {
-                    String tag = tagNode.asText();
-                    if (tag != null && !tag.isEmpty()) {
-                        builder.addMissionTag(tag);
-                    }
-                }
-            }
-        }
-        
-        if (root.has("supportUnits") && root.get("supportUnits") != null) {
-            JsonNode unitsNode = root.get("supportUnits");
-            if (unitsNode.has("unit")) {
-                JsonNode unitNode = unitsNode.get("unit");
-                if (unitNode.isArray()) {
-                    for (JsonNode u : unitNode) {
-                        String unit = u.asText();
-                        if (unit != null && !unit.isEmpty()) {
-                            builder.addSupportUnit(unit);
-                        }
-                    }
-                } else {
-                    String unit = unitNode.asText();
-                    if (unit != null && !unit.isEmpty()) {
-                        builder.addSupportUnit(unit);
-                    }
-                }
-            }
-        }
-        
-        if (root.has("artifactsRecovered") && root.get("artifactsRecovered") != null) {
-            JsonNode artifactsNode = root.get("artifactsRecovered");
-            if (artifactsNode.has("artifact")) {
-                JsonNode artifactNode = artifactsNode.get("artifact");
-                if (artifactNode.isArray()) {
-                    for (JsonNode a : artifactNode) {
-                        String artifact = a.asText();
-                        if (artifact != null && !artifact.isEmpty()) {
-                            builder.addArtifact(artifact);
-                        }
-                    }
-                } else {
-                    String artifact = artifactNode.asText();
-                    if (artifact != null && !artifact.isEmpty()) {
-                        builder.addArtifact(artifact);
-                    }
-                }
-            }
         }
         
         return builder.build();
@@ -239,7 +161,7 @@ public class XmlParserStrategy implements ParserStrategy {
     
     private void addSorcererFromXml(JsonNode node, MissionBuilder builder) {
         String name = getString(node, "name");
-        Rank rank = parseRank(getString(node, "rank"));
+        Rank rank = Rank.parse(getString(node, "rank"));
         if (name != null && !name.isEmpty()) {
             builder.addSorcerer(name, rank);
         }
@@ -247,33 +169,12 @@ public class XmlParserStrategy implements ParserStrategy {
     
     private void addTechniqueFromXml(JsonNode node, MissionBuilder builder) {
         String name = getString(node, "name");
-        TechniqueType type = parseTechniqueType(getString(node, "type"));
+        TechniqueType type = TechniqueType.parse(getString(node, "type"));
         String owner = getString(node, "owner");
         long damage = getLong(node, "damage");
         
         if (name != null && !name.isEmpty()) {
             builder.addTechnique(name, type, owner, damage);
-        }
-    }
-    
-    private void addTimelineEventFromXml(JsonNode node, MissionBuilder builder) {
-        String timestampStr = getString(node, "timestamp");
-        String typeStr = getString(node, "type");
-        String description = getString(node, "description");
-        
-        if (description != null && !description.isEmpty()) {
-            OperationTimeline event = new OperationTimeline();
-            
-            if (timestampStr != null && !timestampStr.isEmpty()) {
-                try {
-                    event.setTimestamp(java.time.LocalDateTime.parse(timestampStr));
-                } catch (Exception e) {
-                }
-            }
-            
-            event.setType(parseTimelineEventType(typeStr));
-            event.setDescription(description);
-            builder.addTimelineEvent(event);
         }
     }
     
@@ -315,104 +216,5 @@ public class XmlParserStrategy implements ParserStrategy {
     private boolean getBoolean(JsonNode node, String field) {
         JsonNode value = node.get(field);
         return value != null && !value.isNull() && value.asBoolean();
-    }
-    
-    private ThreatLevel parseThreatLevel(String value) {
-        if (value == null) return null;
-        try {
-            return ThreatLevel.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Rank parseRank(String value) {
-        if (value == null) return null;
-        try {
-            return Rank.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private TechniqueType parseTechniqueType(String value) {
-        if (value == null) return null;
-        try {
-            return TechniqueType.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private BehaviorType parseBehaviorType(String value) {
-        if (value == null) return null;
-        try {
-            return BehaviorType.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Mobility parseMobility(String value) {
-        if (value == null) return null;
-        try {
-            return Mobility.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private EscalationRisk parseEscalationRisk(String value) {
-        if (value == null) return null;
-        try {
-            return EscalationRisk.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Weather parseWeather(String value) {
-        if (value == null) return null;
-        try {
-            return Weather.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private TimeOfDay parseTimeOfDay(String value) {
-        if (value == null) return null;
-        try {
-            return TimeOfDay.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Visibility parseVisibility(String value) {
-        if (value == null) return null;
-        try {
-            return Visibility.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private PublicExposureRisk parsePublicExposureRisk(String value) {
-        if (value == null) return null;
-        try {
-            return PublicExposureRisk.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private TimelineEventType parseTimelineEventType(String value) {
-        if (value == null) return null;
-        try {
-            return TimelineEventType.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 }

@@ -39,37 +39,42 @@ public class YamlParserStrategy implements ParserStrategy {
                .setLocation(getString(root, "location"))
                .setDamageCost(getLong(root, "damageCost"));
         
-        setOutcome(root, builder);
+        String outcomeStr = getString(root, "outcome");
+        if (outcomeStr != null) {
+            builder.setOutcome(Outcome.parse(outcomeStr));
+        }
         
-        if (root.has("curse")) {
+        if (root.has("curse") && root.get("curse") != null) {
             JsonNode curseNode = root.get("curse");
-            builder.setCurse(
-                getString(curseNode, "name"),
-                getThreatLevel(curseNode, "threatLevel")
-            );
+            String curseName = getString(curseNode, "name");
+            ThreatLevel threatLevel = ThreatLevel.parse(getString(curseNode, "threatLevel"));
+            builder.setCurse(curseName, threatLevel);
         }
         
         if (root.has("sorcerers") && root.get("sorcerers").isArray()) {
             for (JsonNode sNode : root.get("sorcerers")) {
-                builder.addSorcerer(
-                    getString(sNode, "name"),
-                    getRank(sNode, "rank")
-                );
+                String name = getString(sNode, "name");
+                Rank rank = Rank.parse(getString(sNode, "rank"));
+                if (name != null && !name.isEmpty()) {
+                    builder.addSorcerer(name, rank);
+                }
             }
         }
         
         if (root.has("techniques") && root.get("techniques").isArray()) {
             for (JsonNode tNode : root.get("techniques")) {
-                builder.addTechnique(
-                    getString(tNode, "name"),
-                    getTechniqueType(tNode, "type"),
-                    getString(tNode, "owner"),
-                    getLong(tNode, "damage")
-                );
+                String techName = getString(tNode, "name");
+                TechniqueType techType = TechniqueType.parse(getString(tNode, "type"));
+                String ownerName = getString(tNode, "owner");
+                long damage = getLong(tNode, "damage");
+                
+                if (techName != null && !techName.isEmpty()) {
+                    builder.addTechnique(techName, techType, ownerName, damage);
+                }
             }
         }
         
-        if (root.has("economicAssessment")) {
+        if (root.has("economicAssessment") && root.get("economicAssessment") != null) {
             JsonNode ea = root.get("economicAssessment");
             EconomicAssessment assessment = new EconomicAssessment();
             assessment.setTotalDamageCost(getLong(ea, "totalDamageCost"));
@@ -79,10 +84,11 @@ public class YamlParserStrategy implements ParserStrategy {
             assessment.setRecoveryEstimateDays(getInt(ea, "recoveryEstimateDays"));
             assessment.setInsuranceCovered(getBoolean(ea, "insuranceCovered"));
             builder.setEconomicAssessment(assessment);
-        }
-        
+        }      
         return builder.build();
     }
+    
+    
     
     private String getString(JsonNode node, String field) {
         JsonNode value = node.get(field);
@@ -102,46 +108,5 @@ public class YamlParserStrategy implements ParserStrategy {
     private boolean getBoolean(JsonNode node, String field) {
         JsonNode value = node.get(field);
         return value != null && !value.isNull() && value.asBoolean();
-    }
-    
-    private void setOutcome(JsonNode node, MissionBuilder builder) {
-        String value = getString(node, "outcome");
-        if (value != null) {
-            try {
-                builder.setOutcome(Outcome.valueOf(value));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Unknown outcome: " + value);
-            }
-        }
-    }
-    
-    private ThreatLevel getThreatLevel(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return ThreatLevel.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Rank getRank(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return Rank.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private TechniqueType getTechniqueType(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return TechniqueType.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 }

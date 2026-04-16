@@ -98,11 +98,7 @@ public class LegacyTxtParserStrategy implements ParserStrategy {
                 return;
             }
             case "outcome" -> {
-                try {
-                    builder.setOutcome(Outcome.valueOf(value.toUpperCase()));
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Unknown outcome: " + value);
-                }
+                builder.setOutcome(Outcome.parse(value));
                 return;
             }
             case "damageCost" -> {
@@ -146,16 +142,8 @@ public class LegacyTxtParserStrategy implements ParserStrategy {
         
         switch (curseKey) {
             case "name" -> curseName = value;
-            case "threatLevel" -> {
-                try {
-                    threatLevel = ThreatLevel.valueOf(value.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Unknown threatLevel: " + value);
-                }
-                break;
-            }
-        }
-        
+            case "threatLevel" -> threatLevel = ThreatLevel.parse(value);
+        }        
         builder.setCurse(curseName, threatLevel);
     }
     
@@ -172,11 +160,7 @@ public class LegacyTxtParserStrategy implements ParserStrategy {
         if (key.endsWith(".name")) {
             sorcerer.setName(value);
         } else if (key.endsWith(".rank")) {
-            try {
-                sorcerer.setRank(Rank.valueOf(value.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Unknown rank: " + value);
-            }
+            sorcerer.setRank(Rank.parse(value));
         }
     }
     
@@ -193,11 +177,7 @@ public class LegacyTxtParserStrategy implements ParserStrategy {
         if (key.endsWith(".name")) {
             technique.setName(value);
         } else if (key.endsWith(".type")) {
-            try {
-                technique.setType(TechniqueType.valueOf(value.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Unknown technique type: " + value);
-            }
+            technique.setType(TechniqueType.parse(value));
         } else if (key.endsWith(".owner")) {
             technique.setOwnerName(value);
         } else if (key.endsWith(".damage")) {

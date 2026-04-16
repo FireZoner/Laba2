@@ -17,5 +17,15 @@ public enum TimelineEventType {
     RETREAT,
     VICTORY,
     CASUALTY_REPORT,
-    AFTERMATH
+    AFTERMATH;
+    
+    public static TimelineEventType parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return TimelineEventType.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown timeline event type: " + value);
+            return null;
+        }
+    }
 }

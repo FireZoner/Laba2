@@ -16,6 +16,9 @@ import java.io.*;
  */
 public class TxtParserStrategy implements ParserStrategy {
     
+    private Sorcerer currentSorcerer = null;
+    private Technique currentTechnique = null;
+    
     @Override
     public boolean supports(File file) {
         String name = file.getName().toLowerCase();
@@ -37,6 +40,9 @@ public class TxtParserStrategy implements ParserStrategy {
     
     @Override
     public Mission parse(File file, MissionBuilder builder) throws IOException {
+        currentSorcerer = null;
+        currentTechnique = null;
+        
         String currentSection = null;
         
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -47,6 +53,7 @@ public class TxtParserStrategy implements ParserStrategy {
                 if (line.isEmpty()) continue;
                 
                 if (line.startsWith("[") && line.endsWith("]")) {
+                    finalizeCurrentSection(builder);
                     currentSection = line.substring(1, line.length() - 1);
                     continue;
                 }
@@ -59,9 +66,27 @@ public class TxtParserStrategy implements ParserStrategy {
                 
                 processKeyValue(currentSection, key, value, builder);
             }
+            
+            finalizeCurrentSection(builder);
         }
         
         return builder.build();
+    }
+    
+    private void finalizeCurrentSection(MissionBuilder builder) {
+        if (currentSorcerer != null) {
+            if (currentSorcerer.getName() != null && !currentSorcerer.getName().isEmpty()) {
+                builder.addSorcerer(currentSorcerer);
+            }
+            currentSorcerer = null;
+        }
+        
+        if (currentTechnique != null) {
+            if (currentTechnique.getName() != null && !currentTechnique.getName().isEmpty()) {
+                builder.addTechnique(currentTechnique);
+            }
+            currentTechnique = null;
+        }
     }
     
     private void processKeyValue(String section, String key, String value, MissionBuilder builder) {
@@ -81,16 +106,11 @@ public class TxtParserStrategy implements ParserStrategy {
             case "missionId" -> builder.setMissionId(value);
             case "date" -> builder.setDate(value);
             case "location" -> builder.setLocation(value);
-            case "outcome" -> {
-                try {
-                    builder.setOutcome(Outcome.valueOf(value));
-                } catch (IllegalArgumentException e) {}
-            }
+            case "outcome" -> builder.setOutcome(Outcome.parse(value));
             case "damageCost" -> {
                 try {
                     builder.setDamageCost(Long.parseLong(value));
                 } catch (NumberFormatException e) {}
-                break;
             }
         }
     }
@@ -105,69 +125,50 @@ public class TxtParserStrategy implements ParserStrategy {
                 }
             }
             case "threatLevel" -> {
-                try {
-                    ThreatLevel level = ThreatLevel.valueOf(value);
-                    if (builder.build().getCurse() == null) {
-                        builder.setCurse(null, level);
-                    } else {
-                        builder.setCurse(builder.build().getCurse().getName(), level);
-                    }
-                } catch (IllegalArgumentException e) {}
-                break;
+                ThreatLevel level = ThreatLevel.parse(value);
+                if (builder.build().getCurse() == null) {
+                    builder.setCurse(null, level);
+                } else {
+                    builder.setCurse(builder.build().getCurse().getName(), level);
+                }
             }
         }
     }
-    
-    private Sorcerer currentSorcerer = null;
     
     private void processSorcererField(String key, String value, MissionBuilder builder) {
+        if (currentSorcerer == null) {
+            currentSorcerer = new Sorcerer();
+        }
+        
         switch (key) {
-            case "name" -> {
-                currentSorcerer = new Sorcerer();
-                currentSorcerer.setName(value);
-            }
+            case "name" -> currentSorcerer.setName(value);
             case "rank" -> {
-                if (currentSorcerer != null) {
-                    try {
-                        currentSorcerer.setRank(Rank.valueOf(value));
-                        builder.addSorcerer(currentSorcerer);
-                        currentSorcerer = null;
-                    } catch (IllegalArgumentException e) {}
+                currentSorcerer.setRank(Rank.parse(value));
+                if (currentSorcerer.getName() != null) {
+                    builder.addSorcerer(currentSorcerer);
+                    currentSorcerer = null;
                 }
-                break;
             }
         }
     }
     
-    private Technique currentTechnique = null;
-    
     private void processTechniqueField(String key, String value, MissionBuilder builder) {
+        if (currentTechnique == null) {
+            currentTechnique = new Technique();
+        }
+        
         switch (key) {
-            case "name" -> {
-                currentTechnique = new Technique();
-                currentTechnique.setName(value);
-            }
-            case "type" -> {
-                if (currentTechnique != null) {
-                    try {
-                        currentTechnique.setType(TechniqueType.valueOf(value));
-                    } catch (IllegalArgumentException e) {}
-                }
-            }
-            case "owner" -> {
-                if (currentTechnique != null) {
-                    currentTechnique.setOwnerName(value);
-                }
-            }
+            case "name" -> currentTechnique.setName(value);
+            case "type" -> currentTechnique.setType(TechniqueType.parse(value));
+            case "owner" -> currentTechnique.setOwnerName(value);
             case "damage" -> {
-                if (currentTechnique != null) {
-                    try {
-                        currentTechnique.setDamage(Long.parseLong(value));
+                try {
+                    currentTechnique.setDamage(Long.parseLong(value));
+                    if (currentTechnique.getName() != null) {
                         builder.addTechnique(currentTechnique);
                         currentTechnique = null;
-                    } catch (NumberFormatException e) {}
-                }
-                break;
+                    }
+                } catch (NumberFormatException e) {}
             }
         }
     }
@@ -179,21 +180,9 @@ public class TxtParserStrategy implements ParserStrategy {
         }
         
         switch (key) {
-            case "weather" -> {
-                try {
-                    conditions.setWeather(Weather.valueOf(value));
-                } catch (IllegalArgumentException e) {}
-            }
-            case "timeOfDay" -> {
-                try {
-                    conditions.setTimeOfDay(TimeOfDay.valueOf(value));
-                } catch (IllegalArgumentException e) {}
-            }
-            case "visibility" -> {
-                try {
-                    conditions.setVisibility(Visibility.valueOf(value));
-                } catch (IllegalArgumentException e) {}
-            }
+            case "weather" -> conditions.setWeather(Weather.parse(value));
+            case "timeOfDay" -> conditions.setTimeOfDay(TimeOfDay.parse(value));
+            case "visibility" -> conditions.setVisibility(Visibility.parse(value));
             case "cursedEnergyDensity" -> {
                 try {
                     conditions.setCursedEnergyDensity(Integer.parseInt(value));

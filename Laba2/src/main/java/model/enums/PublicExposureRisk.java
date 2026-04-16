@@ -14,5 +14,15 @@ public enum PublicExposureRisk {
     MODERATE,
     HIGH,
     CRITICAL,
-    EXPOSED
+    EXPOSED;
+    
+    public static PublicExposureRisk parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return PublicExposureRisk.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown public exposure risk: " + value);
+            return null;
+        }
+    }
 }

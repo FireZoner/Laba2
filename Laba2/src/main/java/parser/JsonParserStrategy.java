@@ -37,38 +37,50 @@ public class JsonParserStrategy implements ParserStrategy {
                .setLocation(getString(root, "location"))
                .setDamageCost(getLong(root, "damageCost"));
         
-        setOutcome(root, builder);
-        setComment(root, builder);
+        String outcomeStr = getString(root, "outcome");
+        if (outcomeStr != null) {
+            builder.setOutcome(Outcome.parse(outcomeStr));
+        }
         
-        if (root.has("curse")) {
+        String comment = getString(root, "comment");
+        if (comment == null) {
+            comment = getString(root, "note");
+        }
+        if (comment != null) {
+            builder.setComment(comment);
+        }
+        
+        if (root.has("curse") && root.get("curse") != null && !root.get("curse").isNull()) {
             JsonNode curseNode = root.get("curse");
-            builder.setCurse(
-                getString(curseNode, "name"),
-                getThreatLevel(curseNode, "threatLevel")
-            );
+            String curseName = getString(curseNode, "name");
+            ThreatLevel threatLevel = ThreatLevel.parse(getString(curseNode, "threatLevel"));
+            builder.setCurse(curseName, threatLevel);
         }
         
         if (root.has("sorcerers") && root.get("sorcerers").isArray()) {
             for (JsonNode sNode : root.get("sorcerers")) {
-                builder.addSorcerer(
-                    getString(sNode, "name"),
-                    getRank(sNode, "rank")
-                );
+                String name = getString(sNode, "name");
+                Rank rank = Rank.parse(getString(sNode, "rank"));
+                if (name != null && !name.isEmpty()) {
+                    builder.addSorcerer(name, rank);
+                }
             }
         }
         
         if (root.has("techniques") && root.get("techniques").isArray()) {
             for (JsonNode tNode : root.get("techniques")) {
-                builder.addTechnique(
-                    getString(tNode, "name"),
-                    getTechniqueType(tNode, "type"),
-                    getString(tNode, "owner"),
-                    getLong(tNode, "damage")
-                );
+                String techName = getString(tNode, "name");
+                TechniqueType techType = TechniqueType.parse(getString(tNode, "type"));
+                String ownerName = getString(tNode, "owner");
+                long damage = getLong(tNode, "damage");
+                
+                if (techName != null && !techName.isEmpty()) {
+                    builder.addTechnique(techName, techType, ownerName, damage);
+                }
             }
         }
         
-        if (root.has("economicAssessment")) {
+        if (root.has("economicAssessment") && root.get("economicAssessment") != null) {
             JsonNode ea = root.get("economicAssessment");
             EconomicAssessment assessment = new EconomicAssessment();
             assessment.setTotalDamageCost(getLong(ea, "totalDamageCost"));
@@ -79,14 +91,14 @@ public class JsonParserStrategy implements ParserStrategy {
             assessment.setInsuranceCovered(getBoolean(ea, "insuranceCovered"));
             builder.setEconomicAssessment(assessment);
         }
-        
-        if (root.has("enemyActivity")) {
+
+        if (root.has("enemyActivity") && root.get("enemyActivity") != null) {
             JsonNode ea = root.get("enemyActivity");
             EnemyActivity activity = new EnemyActivity();
-            activity.setBehaviorType(getBehaviorType(ea, "behaviorType"));
+            activity.setBehaviorType(BehaviorType.parse(getString(ea, "behaviorType")));
             activity.setTargetPriority(getString(ea, "targetPriority"));
-            activity.setMobility(getMobility(ea, "mobility"));
-            activity.setEscalationRisk(getEscalationRisk(ea, "escalationRisk"));
+            activity.setMobility(Mobility.parse(getString(ea, "mobility")));
+            activity.setEscalationRisk(EscalationRisk.parse(getString(ea, "escalationRisk")));
             
             if (ea.has("attackPatterns") && ea.get("attackPatterns").isArray()) {
                 for (JsonNode pattern : ea.get("attackPatterns")) {
@@ -96,23 +108,23 @@ public class JsonParserStrategy implements ParserStrategy {
             builder.setEnemyActivity(activity);
         }
         
-        if (root.has("environmentConditions")) {
+        if (root.has("environmentConditions") && root.get("environmentConditions") != null) {
             JsonNode ec = root.get("environmentConditions");
             EnvironmentConditions conditions = new EnvironmentConditions();
-            conditions.setWeather(getWeather(ec, "weather"));
-            conditions.setTimeOfDay(getTimeOfDay(ec, "timeOfDay"));
-            conditions.setVisibility(getVisibility(ec, "visibility"));
+            conditions.setWeather(Weather.parse(getString(ec, "weather")));
+            conditions.setTimeOfDay(TimeOfDay.parse(getString(ec, "timeOfDay")));
+            conditions.setVisibility(Visibility.parse(getString(ec, "visibility")));
             conditions.setCursedEnergyDensity(getInt(ec, "cursedEnergyDensity"));
             builder.setEnvironmentConditions(conditions);
         }
         
-        if (root.has("civilianImpact")) {
+        if (root.has("civilianImpact") && root.get("civilianImpact") != null) {
             JsonNode ci = root.get("civilianImpact");
             CivilianImpact impact = new CivilianImpact();
             impact.setEvacuated(getInt(ci, "evacuated"));
             impact.setInjured(getInt(ci, "injured"));
             impact.setMissing(getInt(ci, "missing"));
-            impact.setPublicExposureRisk(getPublicExposureRisk(ci, "publicExposureRisk"));
+            impact.setPublicExposureRisk(PublicExposureRisk.parse(getString(ci, "publicExposureRisk")));
             builder.setCivilianImpact(impact);
         }
         
@@ -137,126 +149,5 @@ public class JsonParserStrategy implements ParserStrategy {
     private boolean getBoolean(JsonNode node, String field) {
         JsonNode value = node.get(field);
         return value != null && !value.isNull() && value.asBoolean();
-    }
-    
-    private void setOutcome(JsonNode node, MissionBuilder builder) {
-        String value = getString(node, "outcome");
-        if (value != null) {
-            try {
-                builder.setOutcome(Outcome.valueOf(value));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Unknown outcome: " + value);
-            }
-        }
-    }
-    
-    private void setComment(JsonNode node, MissionBuilder builder) {
-        String comment = getString(node, "comment");
-        if (comment == null) {
-            comment = getString(node, "note");
-        }
-        if (comment != null) {
-            builder.setComment(comment);
-        }
-    }
-    
-    private ThreatLevel getThreatLevel(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return ThreatLevel.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Rank getRank(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return Rank.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private TechniqueType getTechniqueType(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return TechniqueType.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private BehaviorType getBehaviorType(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return BehaviorType.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Mobility getMobility(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return Mobility.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private EscalationRisk getEscalationRisk(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return EscalationRisk.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Weather getWeather(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return Weather.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private TimeOfDay getTimeOfDay(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return TimeOfDay.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private Visibility getVisibility(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return Visibility.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-    
-    private PublicExposureRisk getPublicExposureRisk(JsonNode node, String field) {
-        String value = getString(node, field);
-        if (value == null) return null;
-        try {
-            return PublicExposureRisk.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 }

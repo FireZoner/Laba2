@@ -12,5 +12,16 @@ package model.enums;
 public enum Rank {
     SPECIAL_GRADE,
     GRADE_1,
-    GRADE_2
+    GRADE_2,
+    SEMI_GRADE_1;
+    
+    public static Rank parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return Rank.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown rank: " + value);
+            return null;
+        }
+    }
 }

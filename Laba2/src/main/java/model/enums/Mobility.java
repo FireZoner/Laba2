@@ -12,5 +12,15 @@ public enum Mobility {
     LOW,
     MEDIUM,
     HIGH,
-    EXTREME
+    EXTREME;
+    
+    public static Mobility parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return Mobility.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown mobility: " + value);
+            return null;
+        }
+    }
 }

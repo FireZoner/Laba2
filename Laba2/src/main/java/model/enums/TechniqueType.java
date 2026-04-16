@@ -10,5 +10,17 @@ package model.enums;
  */
 public enum TechniqueType {
     INNATE,
-    SHIKIGAMI
+    SHIKIGAMI,
+    BODY,
+    WEAPON;
+    
+    public static TechniqueType parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return TechniqueType.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown technique type: " + value);
+            return null;
+        }
+    }
 }

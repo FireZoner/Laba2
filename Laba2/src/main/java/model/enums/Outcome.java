@@ -12,5 +12,15 @@ package model.enums;
 public enum Outcome {
     SUCCESS,
     PARTIAL_SUCCESS,
-    FAILURE
+    FAILURE;
+    
+    public static Outcome parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return Outcome.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown outcome: " + value);
+            return null;
+        }
+    }
 }

@@ -14,5 +14,15 @@ public enum Visibility {
     MODERATE,
     POOR,
     VERY_POOR,
-    ZERO
+    ZERO;
+    
+    public static Visibility parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return Visibility.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown visibility: " + value);
+            return null;
+        }
+    }
 }

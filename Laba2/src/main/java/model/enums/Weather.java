@@ -14,5 +14,15 @@ public enum Weather {
     HEAVY_RAIN,
     STORM,
     FOG,
-    SNOW
+    SNOW;
+    
+    public static Weather parse(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return Weather.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Unknown weather: " + value);
+            return null;
+        }
+    }
 }
